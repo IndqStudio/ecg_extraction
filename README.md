@@ -1,2 +1,2 @@
 # ecg_extraction
-Filter and extract fECG, mECG, UC, etc...
+Filter abdominal ECG and extract fECG, mECG, UC, etc. from it.

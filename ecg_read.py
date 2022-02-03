@@ -33,8 +33,10 @@ lead1=[]
 lead2=[]
 lead3=[]
 try:
-    while (keyboard.is_pressed('q')==False):
-            dat=str(ar.read_data()).strip("b'\\r\\n' ").split(',')
+    while (keyboard.is_pressed('q')==False):# press keyboard q to stop the loop
+        
+            dat=str(ar.read_data()).strip("b'\\r\\n' ").split(',')#clean the string coming in byte format
+            
             lead1.append(int(dat[0]))
             lead2.append(int(dat[1]))
             lead3.append(int(dat[2]))   

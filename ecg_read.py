@@ -44,3 +44,27 @@ try:
 except :
         ar.close_com()
       
+'''
+
+//arduino side sample code 
+void setup() {
+  // initialize serial communication at 9600 bits per second:
+  Serial.begin(115200);
+}
+
+// the loop routine runs over and over again forever:
+void loop() {
+  // read the input on analog pin 0:
+ long  int t =20000000;
+  // print out the value you read:
+  Serial.print(t,DEC);
+   Serial.print(",");
+  Serial.print(t,DEC);
+   Serial.print(",");
+   Serial.print(t,DEC);
+   
+   Serial.println(" ");
+  delay(100);        // delay in between reads for stability
+}
+
+'''

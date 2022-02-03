@@ -9,13 +9,19 @@ class arduino_pyserial:
         self.BAUD=BAUD#baudrate default 115200
         self.TIMEOUT=TIMEOUT
         self.arduino=''
+        
     def init_arduino(self):
+        
+        #init listening to com port 
          try:
               self.arduino=serial.Serial(port=self.COM, baudrate=self.BAUD, 
                                          timeout=self.TIMEOUT)      
          except Exception as e :
               print("port busy, restart")
+                
     def read_data(self):
+        
+        #readlines on python side 
         try:
             data=self.arduino.readline()
             return data
@@ -23,6 +29,7 @@ class arduino_pyserial:
             return e
         
     def close_com(self):
+        
         print("closing com "+self.COM)
         self.arduino.close()
         return 

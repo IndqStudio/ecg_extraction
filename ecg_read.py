@@ -17,7 +17,7 @@ class arduino_pyserial:
               self.arduino=serial.Serial(port=self.COM, baudrate=self.BAUD, 
                                          timeout=self.TIMEOUT)      
          except Exception as e :
-              print("port busy, restart")
+              print(e)
                 
     def read_data(self):
         

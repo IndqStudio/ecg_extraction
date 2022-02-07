@@ -9,14 +9,14 @@ import matplotlib.pyplot as plt
 
 #use below line for jupyter notebook for display 
 #----------------------
-%matplotlib notebook
+#%matplotlib notebook
 #----------------------
 plt.ion()
 
 
 
 class DynamicUpdate():
-
+    #Suppose we know the x range
 
     def on_launch(self):
         #Set up plot
@@ -25,7 +25,7 @@ class DynamicUpdate():
         self.figure.set_figheight(15)
         self.figure.set_figwidth(25)
 
-        self.lines, = self.ax.plot([],[], 'o')
+        self.lines, = self.ax.plot([],[])
         #Autoscale on unknown axis and known lims on the other
         self.ax.set_autoscaley_on(True)
         #Other stuff
@@ -89,7 +89,7 @@ def save_file(l1,l2,l3,t):
     
 
     
-ar=arduino_pyserial("COM4") 
+ar=arduino_pyserial("COM7") 
 dy_plot = DynamicUpdate()
 dy_plot.on_launch()
 ar.init_arduino()#init arduino port ,might cause erro if port is not closed.Replug the board 
@@ -102,6 +102,13 @@ try:
     print('data reading started press q to stop')
     while (keyboard.is_pressed('q')==False):# press keyboard q to stop the loop
             dat=str(ar.read_data()).strip("b'\\r\\n' ").split(',')#clean the string coming in byte format
+            #print(dat,"end...")
+            if(len(dat)<3):
+                dat = ['0','0','0']
+            if(str.isdigit(dat[0])==False or str.isdigit(dat[1])==False or str.isdigit(dat[2])==False):
+                dat = ['0','0','0']
+            
+            print(dat)
             lead1.append(int(dat[0]))
             lead2.append(int(dat[1]))
             lead3.append(int(dat[2]))

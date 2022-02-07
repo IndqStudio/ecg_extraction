@@ -16,7 +16,7 @@ plt.ion()
 
 
 class DynamicUpdate():
-    #Suppose we know the x range
+
 
     def on_launch(self):
         #Set up plot

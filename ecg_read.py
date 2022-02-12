@@ -21,29 +21,60 @@ class DynamicUpdate():
     def on_launch(self):
         #Set up plot
         
-        self.figure, self.ax = plt.subplots()
-        self.figure.set_figheight(15)
-        self.figure.set_figwidth(25)
+        self.figure, self.ax = plt.subplots(3,1, figsize=(35,15))
+        # self.figure.set_figheight(15)
+        # self.figure.set_figwidth(25)
 
-        self.lines, = self.ax.plot([],[])
+        self.lines1, = self.ax[0].plot([],[])
+        self.lines2, = self.ax[1].plot([],[])
+        self.lines3, = self.ax[2].plot([],[])
+
+
         #Autoscale on unknown axis and known lims on the other
-        self.ax.set_autoscaley_on(True)
-        #Other stuff
-        self.ax.grid()
+        self.ax[0].set_autoscaley_on(True)
+        self.ax[1].set_autoscaley_on(True)
+        self.ax[2].set_autoscaley_on(True)
 
-    def on_running(self, xdata, ydata):
+
+        #Other stuff
+        self.ax[0].grid()
+        self.ax[1].grid()
+        self.ax[2].grid()
+
+
+
+    def on_running(self, time, ch1, ch2, ch3):
         #Update data (with the new _and_ the old points)
-        self.lines.set_xdata(xdata)
-        self.lines.set_ydata(ydata)
+        self.lines1.set_xdata(time)
+        self.lines1.set_ydata(ch1)
+        self.lines2.set_xdata(time)
+        self.lines2.set_ydata(ch2)
+        self.lines3.set_xdata(time)
+        self.lines3.set_ydata(ch3)
+        
+        # self.lines1, = self.ax[0].plot(time,ch1, 'r')
+        # self.lines2, = self.ax[1].plot(time,ch2, 'g')
+
+        # self.ax.set_autoscaley_on(True)
+
+
         #Need both of these in order to rescale
-        self.ax.relim()
-        self.ax.autoscale_view()
+        self.ax[0].relim()
+        self.ax[1].relim()
+        self.ax[2].relim()
+
+
+        self.ax[0].autoscale_view()
+        self.ax[1].autoscale_view()
+        self.ax[2].autoscale_view()
+
+
         #We need to draw *and* flush
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
 class arduino_pyserial:
-    def __init__(self,COM,BAUD=115200,TIMEOUT=.1):
+    def __init__(self,COM,BAUD=9600,TIMEOUT=.1):
         self.COM=COM
         self.BAUD=BAUD#baudrate default 115200
         self.TIMEOUT=TIMEOUT
@@ -89,7 +120,7 @@ def save_file(l1,l2,l3,t):
     
 
     
-ar=arduino_pyserial("COM7") 
+ar=arduino_pyserial("/dev/ttyACM0") 
 dy_plot = DynamicUpdate()
 dy_plot.on_launch()
 ar.init_arduino()#init arduino port ,might cause erro if port is not closed.Replug the board 
@@ -102,19 +133,19 @@ try:
     print('data reading started press q to stop')
     while (keyboard.is_pressed('q')==False):# press keyboard q to stop the loop
             dat=str(ar.read_data()).strip("b'\\r\\n' ").split(',')#clean the string coming in byte format
-            #print(dat,"end...")
+            print(dat,"end...")
             if(len(dat)<3):
                 dat = ['0','0','0']
             if(str.isdigit(dat[0])==False or str.isdigit(dat[1])==False or str.isdigit(dat[2])==False):
                 dat = ['0','0','0']
             
-            print(dat)
+            # print(dat)
             lead1.append(int(dat[0]))
             lead2.append(int(dat[1]))
             lead3.append(int(dat[2]))
             time.append(datetime.datetime.now())  
             index.append(len(lead1))
-            dy_plot.on_running(index[-10:],lead1[-10:])#sending last 10 points to plot 
+            dy_plot.on_running(index[-40:],lead1[-40:],lead2[-40:], lead3[-40:])#sending last 10 points to plot 
 
           
             

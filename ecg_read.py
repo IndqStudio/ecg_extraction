@@ -1,4 +1,5 @@
 # Importing Libraries
+# from turtle import color
 import serial  #pip install pyserial
 import time
 import keyboard  #pip install keyboard
@@ -6,6 +7,8 @@ import pandas as pd
 import datetime   
 import os
 import matplotlib.pyplot as plt
+import numpy as np
+import scipy.signal
 
 #use below line for jupyter notebook for display 
 #----------------------
@@ -17,6 +20,7 @@ plt.ion()
 
 class DynamicUpdate():
     #Suppose we know the x range
+    # def center(self, data)
 
     def on_launch(self):
         #Set up plot
@@ -25,9 +29,16 @@ class DynamicUpdate():
         # self.figure.set_figheight(15)
         # self.figure.set_figwidth(25)
 
-        self.lines1, = self.ax[0].plot([],[])
-        self.lines2, = self.ax[1].plot([],[])
-        self.lines3, = self.ax[2].plot([],[])
+        self.lines1, = self.ax[0].plot([],[], 'g')
+        self.lines2, = self.ax[1].plot([],[], 'g')
+        self.lines3, = self.ax[2].plot([],[], 'g')
+        self.ax[0].set_facecolor("black")
+        self.ax[1].set_facecolor("black")
+        self.ax[2].set_facecolor("black")
+        self.ax[0].set_ylabel("channel-1")
+        self.ax[1].set_ylabel("channel-2")
+        self.ax[2].set_ylabel("channel-3")
+
 
 
         #Autoscale on unknown axis and known lims on the other
@@ -37,9 +48,9 @@ class DynamicUpdate():
 
 
         #Other stuff
-        self.ax[0].grid()
-        self.ax[1].grid()
-        self.ax[2].grid()
+        # self.ax[0].grid(color='green')
+        # self.ax[1].grid(color='green')
+        # self.ax[2].grid(color='green')
 
 
 
@@ -74,7 +85,7 @@ class DynamicUpdate():
         self.figure.canvas.flush_events()
 
 class arduino_pyserial:
-    def __init__(self,COM,BAUD=9600,TIMEOUT=.1):
+    def __init__(self,COM,BAUD=57600,TIMEOUT=.01):
         self.COM=COM
         self.BAUD=BAUD#baudrate default 115200
         self.TIMEOUT=TIMEOUT
@@ -129,6 +140,16 @@ lead2=[]
 lead3=[]
 time=[]
 index=[]#temp for plotting 
+
+def center(x):
+    mean = np.mean(x, axis=0, keepdims=True)
+    centered =  x - mean
+    return centered
+
+# b, a = scipy.signal.butter(3, [0.05, .1], 'band')
+b, a = scipy.signal.butter(3, 0.05, 'highpass')
+
+# f6 = scipy.signal.lfilter(b, a, data8.iloc[500:,0])
 try:
     print('data reading started press q to stop')
     while (keyboard.is_pressed('q')==False):# press keyboard q to stop the loop
@@ -143,14 +164,31 @@ try:
             lead1.append(int(dat[0]))
             lead2.append(int(dat[1]))
             lead3.append(int(dat[2]))
-            time.append(datetime.datetime.now())  
+            time.append(datetime.datetime.now())
             index.append(len(lead1))
-            dy_plot.on_running(index[-40:],lead1[-40:],lead2[-40:], lead3[-40:])#sending last 10 points to plot 
+            center_filter1 = scipy.signal.lfilter(b,a,center(lead1[-180:]))
+            center_filter2 = scipy.signal.lfilter(b,a,center(lead2[-180:]))
+            center_filter3 = scipy.signal.lfilter(b,a,center(lead3[-180:]))
+            # print(center_filter1, len(center_filter1),"bef0re")
+
+            # if(center_filter1[len(center_filter1)-1]<-200000):
+            #     lead1[len(lead1)-1]=0
+            #     center_filter1[len(center_filter1)-1]=0
+            # diff = lead1[len(lead1)-1] - lead1[len(lead1)-2]
+            # if(diff<-200000):
+            #     lead1[len(lead1)-1]=0
+
+            # print(center_filter1[len(center_filter1)-1],len(center_filter1)-1)
+            # print(center_filter1, len(center_filter1),"after")
+            # print(len(lead1), len(center_filter1))
+            print(len(lead1))
+            # np.linspace(0,len(lead1)/2, num=len(lead1))
+            dy_plot.on_running(index[-150:],center_filter1[-150:],center_filter2[-150:], center_filter3[-150:])#sending last 10 points to plot 
 
           
             
     ar.close_com()
-    save_file(lead1,lead2,lead3,time)#saving file after "q" is pressed otherwise won't 
+    # save_file(lead1,lead2,lead3,time)#saving file after "q" is pressed otherwise won't 
   
 except Exception as e :
         print(e)
